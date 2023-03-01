@@ -106,6 +106,7 @@ class Env(ABC):
 
         self.clip_obs = config["env"].get("clipObservations", np.Inf)
         self.clip_actions = config["env"].get("clipActions", np.Inf)
+        self.applied = 0
 
     @abc.abstractmethod 
     def allocate_buffers(self):
@@ -320,23 +321,27 @@ class VecTask(Env):
             Observations are dict of observations (currently only one member called 'obs')
         """
 
+
         # randomize actions
         if self.dr_randomizations.get('actions', None):
             actions = self.dr_randomizations['actions']['noise_lambda'](actions)
 
         action_tensor = torch.clamp(actions, -self.clip_actions, self.clip_actions)
+
         # apply actions
+        self.applied = 0
         self.pre_physics_step(action_tensor)
+        
+        if self.applied == 0:
+            # step physics and render each frame
+            for i in range(self.control_freq_inv):
+                if self.force_render:
+                    self.render()
+                self.gym.simulate(self.sim)
 
-        # step physics and render each frame
-        for i in range(self.control_freq_inv):
-            if self.force_render:
-                self.render()
-            self.gym.simulate(self.sim)
-
-        # to fix!
-        if self.device == 'cpu':
-            self.gym.fetch_results(self.sim, True)
+            # to fix!
+            if self.device == 'cpu':
+                self.gym.fetch_results(self.sim, True)
 
         # compute observations, rewards, resets, ...
         self.post_physics_step()

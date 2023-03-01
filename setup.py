@@ -14,7 +14,7 @@ root_dir = os.path.dirname(os.path.realpath(__file__))
 # Minimum dependencies required prior to installation
 INSTALL_REQUIRES = [
     # RL
-    "gym==0.24.1",
+    "gym==0.23.1",
     "torch",
     "omegaconf",
     "termcolor",
@@ -33,7 +33,7 @@ setup(
     description="Benchmark environments for high-speed robot learning in NVIDIA IsaacGym.",
     keywords=["robotics", "rl"],
     include_package_data=True,
-    python_requires=">=3.6.*",
+    python_requires=">=3.6.1",
     install_requires=INSTALL_REQUIRES,
     packages=find_packages("."),
     classifiers=["Natural Language :: English", "Programming Language :: Python :: 3.7, 3.8"],
